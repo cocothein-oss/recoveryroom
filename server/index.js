@@ -17,6 +17,7 @@ import cors from 'cors';
 import http from 'http';
 import apiRoutes from './routes/api.js';
 import transferRoutes from './routes/transfer.js';
+import webhookRoutes from './routes/webhook.js';
 import { solanaTransfer } from './services/solanaTransfer.js';
 import { initWebSocket } from './services/websocket.js';
 
@@ -40,6 +41,7 @@ app.use((req, res, next) => {
 // API Routes
 app.use('/api', apiRoutes);
 app.use('/api/transfer', transferRoutes);
+app.use('/webhook', webhookRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {
@@ -87,9 +89,11 @@ async function startServer() {
 ║   GET  /api/live-feed       - Live entries            ║
 ║   GET  /api/pool-stats      - Pool statistics         ║
 ║   POST /api/admin/clear     - Clear all data          ║
+║   POST /webhook/github      - GitHub auto-deploy      ║
 ║                                                       ║
 ║   Treasury: ${treasuryReady ? 'CONFIGURED' : 'NOT CONFIGURED'}                         ║
 ║   WebSocket: ENABLED                                  ║
+║   Webhook:   ${process.env.GITHUB_WEBHOOK_SECRET ? 'SECURED' : 'NO SECRET'}                            ║
 ║                                                       ║
 ╚═══════════════════════════════════════════════════════╝
     `);
