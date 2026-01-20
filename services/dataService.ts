@@ -277,18 +277,19 @@ class DataService {
    */
   async getPrizePool(): Promise<{ amountSol: number; currency: string; configured: boolean; address?: string }> {
     try {
-      // Fetch real treasury balance
+      // Fetch PumpFun creator wallet balance (primary source for prize pool)
       const response = await this.fetch<{
         success: boolean;
         data: {
-          balanceSol: number;
+          total: number;
+          distributable: number;
           configured: boolean;
           address?: string;
         }
-      }>('/transfer/balance');
+      }>('/pumpfun/wallet');
 
       return {
-        amountSol: response.data.balanceSol,
+        amountSol: response.data.distributable,
         currency: 'SOL',
         configured: response.data.configured,
         address: response.data.address,
