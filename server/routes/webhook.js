@@ -11,14 +11,15 @@ import { promisify } from 'util';
 const execAsync = promisify(exec);
 const router = express.Router();
 
-// Webhook secret - set this in your .env file
-const WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
+// Get webhook secret at runtime (not at module load time due to ES module hoisting)
+const getWebhookSecret = () => process.env.GITHUB_WEBHOOK_SECRET || '';
 
 /**
  * Verify GitHub webhook signature
  */
 function verifySignature(payload, signature) {
-  if (!WEBHOOK_SECRET) {
+  const secret = getWebhookSecret();
+  if (!secret) {
     console.warn('GITHUB_WEBHOOK_SECRET not set - skipping signature verification');
     return true;
   }
@@ -28,7 +29,7 @@ function verifySignature(payload, signature) {
   }
 
   const sig = Buffer.from(signature, 'utf8');
-  const hmac = crypto.createHmac('sha256', WEBHOOK_SECRET);
+  const hmac = crypto.createHmac('sha256', secret);
   const digest = Buffer.from('sha256=' + hmac.update(payload).digest('hex'), 'utf8');
 
   return sig.length === digest.length && crypto.timingSafeEqual(digest, sig);
@@ -124,7 +125,7 @@ router.post('/github', express.raw({ type: 'application/json' }), async (req, re
 router.get('/status', (req, res) => {
   res.json({
     status: 'ok',
-    webhookConfigured: !!WEBHOOK_SECRET,
+    webhookConfigured: !!getWebhookSecret(),
     deployDir: process.env.DEPLOY_DIR || '/var/www/recoveryroom',
   });
 });
@@ -135,8 +136,9 @@ router.get('/status', (req, res) => {
  */
 router.post('/manual', async (req, res) => {
   const secret = req.headers['x-deploy-secret'];
+  const webhookSecret = getWebhookSecret();
 
-  if (!WEBHOOK_SECRET || secret !== WEBHOOK_SECRET) {
+  if (!webhookSecret || secret !== webhookSecret) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
