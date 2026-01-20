@@ -48,9 +48,104 @@ class PumpFunService {
   constructor() {
     this.connection = new Connection(RPC_URL);
     this.bondingCurveAddress = null;
-    this.cachedData = null;
-    this.lastFetchTime = 0;
-    this.cacheExpiry = 30000; // 30 seconds cache
+    this.creatorVaultAddress = null;
+  }
+
+  /**
+   * Derive the creator vault PDA where unclaimed fees are stored
+   * Seeds: ['creator-vault', creator_pubkey]
+   */
+  getCreatorVaultPDA() {
+    if (this.creatorVaultAddress) return this.creatorVaultAddress;
+
+    const creatorPubkey = new PublicKey(TOKEN_CONFIG.creatorWallet);
+    const [vaultPDA] = PublicKey.findProgramAddressSync(
+      [Buffer.from('creator-vault'), creatorPubkey.toBuffer()],
+      PUMP_PROGRAM_ID
+    );
+
+    this.creatorVaultAddress = vaultPDA;
+    return vaultPDA;
+  }
+
+  /**
+   * Get unclaimed creator fees from the creator vault PDA
+   * The vault is derived using ['creator-vault', creator] where creator comes from the bonding curve
+   */
+  async getUnclaimedFees() {
+    try {
+      const rentExemptMinimum = 890880;
+
+      // Step 1: Get the creator pubkey from the bonding curve account
+      const bondingCurve = await this.getBondingCurveData();
+
+      if (!bondingCurve) {
+        console.log('Could not fetch bonding curve data');
+        return { unclaimedLamports: 0, unclaimedSol: 0, error: 'Bonding curve not found' };
+      }
+
+      console.log('Bonding curve data:', {
+        address: bondingCurve.bondingCurveAddress,
+        creator: bondingCurve.creator,
+        complete: bondingCurve.complete,
+      });
+
+      // Step 2: Get the creator pubkey - first try from bonding curve, then fall back to config
+      let creatorPubkey;
+      if (bondingCurve.creator) {
+        creatorPubkey = new PublicKey(bondingCurve.creator);
+        console.log(`Using creator from bonding curve: ${bondingCurve.creator}`);
+      } else {
+        creatorPubkey = new PublicKey(TOKEN_CONFIG.creatorWallet);
+        console.log(`Using creator from config: ${TOKEN_CONFIG.creatorWallet}`);
+      }
+
+      // Step 3: Derive the creator vault PDA using seeds ['creator-vault', creator]
+      const [creatorVaultPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from('creator-vault'), creatorPubkey.toBuffer()],
+        PUMP_PROGRAM_ID
+      );
+
+      console.log(`Creator vault PDA: ${creatorVaultPda.toBase58()}`);
+
+      // Step 4: Query the vault account balance
+      const accountInfo = await this.connection.getAccountInfo(creatorVaultPda);
+
+      if (!accountInfo) {
+        console.log('Creator vault account not found (not initialized yet)');
+        return {
+          unclaimedLamports: 0,
+          unclaimedSol: 0,
+          vaultAddress: creatorVaultPda.toBase58(),
+          creator: creatorPubkey.toBase58(),
+          derivation: 'creator-vault',
+          accountExists: false,
+        };
+      }
+
+      // The vault balance minus rent-exempt minimum is the unclaimed fees
+      const totalLamports = accountInfo.lamports;
+      const unclaimedLamports = Math.max(0, totalLamports - rentExemptMinimum);
+      const unclaimedSol = unclaimedLamports / LAMPORTS_PER_SOL;
+
+      console.log(`Creator vault balance: ${totalLamports} lamports (${totalLamports / LAMPORTS_PER_SOL} SOL)`);
+      console.log(`Unclaimed fees: ${unclaimedLamports} lamports (${unclaimedSol} SOL)`);
+
+      return {
+        unclaimedLamports,
+        unclaimedSol,
+        totalLamports,
+        totalSol: totalLamports / LAMPORTS_PER_SOL,
+        vaultAddress: creatorVaultPda.toBase58(),
+        creator: creatorPubkey.toBase58(),
+        derivation: 'creator-vault',
+        accountExists: true,
+        bondingCurveCreator: bondingCurve.creator,
+      };
+    } catch (error) {
+      console.error('Error fetching unclaimed fees:', error);
+      return { unclaimedLamports: 0, unclaimedSol: 0, error: error.message };
+    }
   }
 
   /**
@@ -77,7 +172,8 @@ class PumpFunService {
   }
 
   /**
-   * Fetch bonding curve account data
+   * Fetch bonding curve account data including the creator pubkey
+   * The creator field is at offset 49 (after 8 discriminator + 40 reserves/supply + 1 complete)
    */
   async getBondingCurveData() {
     try {
@@ -104,6 +200,14 @@ class PumpFunService {
       const tokenTotalSupply = data.readBigUInt64LE(offset);
       offset += 8;
       const complete = data.readUInt8(offset);
+      offset += 1;
+
+      // Read creator pubkey (32 bytes) - this is the key for the creator vault PDA
+      let creatorPubkey = null;
+      if (data.length >= offset + 32) {
+        const creatorBytes = data.slice(offset, offset + 32);
+        creatorPubkey = new PublicKey(creatorBytes).toBase58();
+      }
 
       return {
         virtualTokenReserves: Number(virtualTokenReserves) / 1e6,
@@ -112,8 +216,10 @@ class PumpFunService {
         realSolReserves: Number(realSolReserves) / 1e9,
         tokenTotalSupply: Number(tokenTotalSupply) / 1e6,
         complete: complete === 1,
+        creator: creatorPubkey,
         accountLamports: accountInfo.lamports,
         accountSol: accountInfo.lamports / 1e9,
+        bondingCurveAddress: bondingCurve.toBase58(),
       };
     } catch (error) {
       console.error('Error fetching bonding curve data:', error);

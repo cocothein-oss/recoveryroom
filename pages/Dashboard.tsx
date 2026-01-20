@@ -194,7 +194,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   useEffect(() => {
     const fetchPrizeData = async () => {
       try {
-        // Fetch PumpFun creator fees (primary source for hourly pot)
+        // Fetch PumpFun trading data for display
         const pumpFunData = await dataService.getPumpFunFees();
         if (pumpFunData) {
           setPumpFunFees({
@@ -203,27 +203,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             volume24h: pumpFunData.volume24h,
             priceUsd: pumpFunData.priceUsd,
           });
-          // Use PumpFun estimated 1h fees as prize pool (in USD, convert to SOL estimate)
-          // For now, use the USD value directly - actual SOL conversion happens on backend
-          if (pumpFunData.estimatedFees1h > 0 && pumpFunData.priceNative > 0) {
-            // Convert USD fees to SOL: fees_usd / (token_price_usd * tokens_per_sol)
-            // priceNative is token price in SOL
-            const solPrice = pumpFunData.priceUsd / pumpFunData.priceNative;
-            const feesInSol = pumpFunData.estimatedFees1h / solPrice;
-            setPrizePoolSol(feesInSol);
-          }
         }
 
-        // Also fetch creator wallet info
+        // Fetch actual unclaimed fees from on-chain creator vault PDA
+        // This is the REAL prize pool - actual SOL waiting to be claimed
         const pool = await dataService.getPrizePool();
+        if (pool.configured && pool.amountSol >= 0) {
+          setPrizePoolSol(pool.amountSol);
+        }
         if (pool.address) {
           setTreasuryAddress(pool.address);
-        }
-        // If no estimated fees from trading volume, show 0 (fees will be claimed on spin)
-        if (!pumpFunData || pumpFunData.estimatedFees1h <= 0) {
-          // Don't show wallet balance - show 0 or estimated fees only
-          // Actual unclaimed fees will be claimed and distributed on spin
-          setPrizePoolSol(0);
         }
 
         // Fetch user winnings if connected

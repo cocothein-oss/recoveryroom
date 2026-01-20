@@ -857,6 +857,24 @@ router.get('/pumpfun/wallet', async (req, res) => {
 });
 
 /**
+ * GET /api/pumpfun/unclaimed
+ * Get actual unclaimed creator fees from on-chain vault PDA
+ */
+router.get('/pumpfun/unclaimed', async (req, res) => {
+  try {
+    const unclaimed = await pumpfunService.getUnclaimedFees();
+
+    res.json({
+      success: true,
+      data: unclaimed,
+    });
+  } catch (error) {
+    console.error('Error getting unclaimed fees:', error);
+    res.status(500).json({ success: false, error: 'Failed to get unclaimed fees' });
+  }
+});
+
+/**
  * POST /api/pumpfun/claim
  * Manually trigger creator fee claim from PumpFun
  */
