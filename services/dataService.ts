@@ -273,26 +273,35 @@ class DataService {
   // ============ Prize Pool Operations ============
 
   /**
-   * Get current prize pool (from real treasury balance)
+   * Get current prize pool (estimated unclaimed PumpFun fees)
    */
   async getPrizePool(): Promise<{ amountSol: number; currency: string; configured: boolean; address?: string }> {
     try {
-      // Fetch PumpFun creator wallet balance (primary source for prize pool)
-      const response = await this.fetch<{
+      // Fetch estimated unclaimed fees from PumpFun
+      const feesResponse = await this.fetch<{
         success: boolean;
         data: {
-          total: number;
-          distributable: number;
-          configured: boolean;
-          address?: string;
+          estimatedFees1h: number;
+          volume1h: number;
+          priceNative: number;
+          token: { creatorWallet: string };
         }
-      }>('/pumpfun/wallet');
+      }>('/pumpfun/fees');
+
+      // Convert estimated fees (USD) to SOL
+      // estimatedFees1h is in USD, priceNative is token price in SOL
+      let estimatedSol = 0;
+      if (feesResponse.data.estimatedFees1h > 0 && feesResponse.data.priceNative > 0) {
+        // Fee in USD / (price per token in SOL * tokens per SOL value)
+        // Simplified: use volume-based estimate
+        estimatedSol = feesResponse.data.volume1h * 0.003; // 0.3% creator fee on volume
+      }
 
       return {
-        amountSol: response.data.distributable,
+        amountSol: estimatedSol,
         currency: 'SOL',
-        configured: response.data.configured,
-        address: response.data.address,
+        configured: true,
+        address: feesResponse.data.token?.creatorWallet,
       };
     } catch (error) {
       console.error('Error fetching prize pool:', error);

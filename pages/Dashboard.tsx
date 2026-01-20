@@ -214,14 +214,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           }
         }
 
-        // Also fetch treasury balance as backup/additional pool
+        // Also fetch creator wallet info
         const pool = await dataService.getPrizePool();
         if (pool.address) {
           setTreasuryAddress(pool.address);
         }
-        // If no PumpFun fees, fall back to treasury balance
+        // If no estimated fees from trading volume, show 0 (fees will be claimed on spin)
         if (!pumpFunData || pumpFunData.estimatedFees1h <= 0) {
-          setPrizePoolSol(pool.amountSol);
+          // Don't show wallet balance - show 0 or estimated fees only
+          // Actual unclaimed fees will be claimed and distributed on spin
+          setPrizePoolSol(0);
         }
 
         // Fetch user winnings if connected
