@@ -176,7 +176,7 @@ export const Landing: React.FC = () => {
           <StepCard
             step="01"
             title="Scan Diagnosis"
-            desc="Connect your wallet. Our algorithm performs a deep-tissue exam on your history to find 'investments' that went to zero (Losses > $50)."
+            desc="Plug in your wallet. The protocol scans your on-chain history to identify legit financial trauma, not skill issues."
           />
           <StepCard
             step="02"

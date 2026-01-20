@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, Skull, Trophy, Lock, BarChart3, Menu, X, ExternalLink, LogOut, PieChart } from 'lucide-react';
+import { Activity, Skull, Trophy, Lock, BarChart3, Menu, X, ExternalLink, LogOut, PieChart, Github, Copy, Check, Coins } from 'lucide-react';
 import { AppRoute } from '../types';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -24,9 +24,28 @@ const NavItem = ({ to, icon: Icon, label, active }: { to: string, icon: any, lab
   </Link>
 );
 
+// Token address
+const TOKEN_ADDRESS = 'DitHyRMQiSDhn5cnKMJV2CDDt6sVct96YrECiM49pump';
+
+// X/Twitter icon component (lucide doesn't have X logo)
+const XIcon = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+  </svg>
+);
+
 export const Layout: React.FC<LayoutProps> = ({ children, onConnect, onDisconnect, walletAddress }) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
+
+  const copyTokenAddress = () => {
+    if (TOKEN_ADDRESS !== 'COMING_SOON') {
+      navigator.clipboard.writeText(TOKEN_ADDRESS);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-rehab-900 grid-bg relative">
@@ -127,20 +146,71 @@ export const Layout: React.FC<LayoutProps> = ({ children, onConnect, onDisconnec
         )}
       </nav>
 
+      {/* Token Bar */}
+      <div className="bg-slate-950/80 border-b border-rehab-green/10 py-2">
+        <div className="max-w-7xl mx-auto px-4 flex justify-center">
+          <div className="flex items-center bg-slate-800/60 border border-slate-700/50 rounded-full overflow-hidden shadow-lg shadow-rehab-green/5">
+            <div className="flex items-center space-x-2 px-4 py-2 border-r border-slate-700/50">
+              <Coins size={16} className="text-rehab-green" />
+              <span className="text-xs text-rehab-green font-bold tracking-wide">$RFND</span>
+            </div>
+            <div className="px-4 py-2">
+              <span className="text-xs text-slate-300 font-mono">
+                {TOKEN_ADDRESS.slice(0, 6)}...{TOKEN_ADDRESS.slice(-6)}
+              </span>
+            </div>
+            <button
+              onClick={copyTokenAddress}
+              className="px-3 py-2 border-l border-slate-700/50 hover:bg-rehab-green/10 transition-colors rounded-r-full"
+              title="Copy address"
+            >
+              {copied ? (
+                <Check size={14} className="text-rehab-green" />
+              ) : (
+                <Copy size={14} className="text-slate-400 hover:text-rehab-green transition-colors" />
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Main Content */}
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {children}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-rehab-900 py-6">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-slate-600 text-xs font-mono uppercase tracking-widest">
-            RFND &copy; 2024. Not financial advice. Just vibes & healing.
-          </p>
-          <div className="mt-2 flex justify-center space-x-4 text-slate-700 text-xs">
-            <Link to={AppRoute.ADMIN} className="hover:text-rehab-green flex items-center space-x-1">
-              <Lock size={10} /> <span>Admin Access</span>
+      <footer className="border-t border-rehab-green/20 bg-rehab-900/95 py-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            {/* Social Icons */}
+            <div className="flex items-center space-x-3">
+              <a
+                href="https://github.com/cocothein-oss/recoveryroom"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-center w-9 h-9 rounded-full bg-slate-800/50 border border-slate-700 hover:border-rehab-green hover:bg-rehab-green/10 transition-all duration-300"
+              >
+                <Github size={18} className="text-slate-400 group-hover:text-rehab-green transition-colors" />
+              </a>
+              <a
+                href="https://x.com/rfndfun"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-center w-9 h-9 rounded-full bg-slate-800/50 border border-slate-700 hover:border-rehab-green hover:bg-rehab-green/10 transition-all duration-300 text-slate-400 hover:text-rehab-green"
+              >
+                <XIcon size={16} />
+              </a>
+            </div>
+
+            {/* Copyright */}
+            <p className="text-slate-600 text-xs font-mono uppercase tracking-widest">
+              RFND &copy; 2025. Not financial advice. Just vibes & healing.
+            </p>
+
+            {/* Admin Link */}
+            <Link to={AppRoute.ADMIN} className="text-slate-700 hover:text-rehab-green text-xs flex items-center space-x-1 transition-colors">
+              <Lock size={10} /> <span>Admin</span>
             </Link>
           </div>
         </div>

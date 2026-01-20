@@ -1,13 +1,47 @@
-# Recovery Room
+# RFND - Loss Recovery Protocol
 
-A Solana-based loss recovery lottery protocol that redistributes PumpFun creator fees to token holders who have experienced trading losses.
+A Solana-based loss recovery protocol that redistributes PumpFun creator fees to token holders who have experienced trading losses.
 
 ## How It Works
 
-1. **Token Creation**: Create a token on PumpFun - creator fees (0.30% of trading volume) fund the prize pool
-2. **Participation**: Users holding tokens with >50% unrealized losses can enter hourly lottery rounds
-3. **Hourly Draws**: VRF-based random selection determines winners each hour
-4. **Prize Distribution**: Auto-claimed creator fees are distributed to winners proportionally based on their holdings
+### 1. Token & Fee Flow
+
+The $RFND token is live on Pump.fun. All creator fees generated from $RFND trading activity are automatically routed to the protocol treasury. 100% of collected creator fees are reserved exclusively for user payouts through the recovery mechanism.
+
+### 2. Treasury Accumulation
+
+Creator fees accumulate in the treasury continuously as trading volume occurs. The treasury is the sole funding source for all distribution rounds and does not serve any other purpose.
+
+### 3. Eligibility Scan
+
+Users connect their wallet to the application. The protocol analyzes on-chain portfolio history to identify eligible loss positions.
+
+A position is eligible if **all** of the following conditions are met:
+- Unrealized loss exceeds **80%**
+- Total traded volume for the token is below **$2,000**
+- The user is still holding the token
+
+Only positions meeting every criterion can be submitted into a round.
+
+### 4. Submission Phase
+
+Eligible users may submit qualifying positions into the active round. Each submitted position represents an entry in the upcoming draw. Submissions remain open until the next scheduled draw.
+
+### 5. Hourly Draw (Square Root Weighted)
+
+Every 1 hour, the protocol executes a draw using a verifiable random function (VRF).
+
+To limit disproportionate influence from large positions, entries are weighted using square root weighting:
+
+```
+Weight = √(Number of Entries)
+```
+
+This approach reduces the marginal advantage of larger submissions while still preserving proportional participation incentives.
+
+### 6. Prize Distribution
+
+The treasury balance allocated to the round is distributed to selected participants. Payouts are executed automatically from the treasury to user wallets. All distributions are fully on-chain and publicly verifiable.
 
 ## Features
 
@@ -139,11 +173,10 @@ ENCRYPTION_PASSWORD=your-encryption-password
 
 ## Token Eligibility
 
-Tokens qualify for lottery entry if:
-- Loss percentage >= 50% from entry price
-- 24h trading volume <= $100,000
+Tokens qualify for entry if:
+- Unrealized loss exceeds **80%**
+- Total traded volume for the token is below **$2,000**
 - User still holds the tokens
-- User has purchase history (not airdrops)
 
 ## Security
 
