@@ -1,5 +1,5 @@
 {
-  "name": "The Recovery Room (GEM)",
-  "description": "A gamified Solana loss recovery protocol. Turn your red PnL into green paydays via a provably fair lottery system.",
+  "name": "RFND",
+  "description": "RFND - Solana loss recovery protocol. Turn your red PnL into green paydays via a provably fair lottery system.",
   "requestFramePermissions": []
 }

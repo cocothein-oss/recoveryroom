@@ -39,15 +39,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, onConnect, onDisconnec
           <div className="flex items-center justify-between h-16">
             
             {/* Logo */}
-            <div className="flex-shrink-0 flex items-center space-x-3 cursor-pointer">
-              <div className="bg-rehab-green/20 p-2 rounded-full border border-rehab-green">
-                <Activity className="text-rehab-green h-6 w-6 animate-pulse-slow" />
-              </div>
+            <Link to={AppRoute.LANDING} className="flex-shrink-0 flex items-center space-x-3 cursor-pointer">
+              <img src="/logoweb.png" alt="RFND" className="h-10 w-10 rounded-full" />
               <div>
-                <h1 className="text-white font-bold text-lg tracking-wider">RECOVERY<span className="text-rehab-green">ROOM</span></h1>
-                <p className="text-[10px] text-slate-500 font-mono tracking-widest uppercase">Solana Trauma Center</p>
+                <h1 className="text-white font-bold text-lg tracking-wider">RF<span className="text-rehab-green">ND</span></h1>
+                <p className="text-[10px] text-slate-500 font-mono tracking-widest uppercase">Loss Recovery Protocol</p>
               </div>
-            </div>
+            </Link>
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center space-x-2">
@@ -138,7 +136,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onConnect, onDisconnec
       <footer className="border-t border-slate-800 bg-rehab-900 py-6">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-slate-600 text-xs font-mono uppercase tracking-widest">
-            The Recovery Room &copy; 2024. Not financial advice. Just vibes & healing.
+            RFND &copy; 2024. Not financial advice. Just vibes & healing.
           </p>
           <div className="mt-2 flex justify-center space-x-4 text-slate-700 text-xs">
             <Link to={AppRoute.ADMIN} className="hover:text-rehab-green flex items-center space-x-1">

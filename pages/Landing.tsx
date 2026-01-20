@@ -1,4 +1,4 @@
-// Recovery Room v1.0.0 - Deployed on DigitalOcean
+// RFND v1.0.0 - Loss Recovery Protocol
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, TrendingUp, Users, Coins } from 'lucide-react';
@@ -81,8 +81,8 @@ export const Landing: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          The first specialized recovery center for Solana degens.
-          Scan your wallet for rugged tokens, submit your "Trauma", and enter the hourly lottery pool.
+          RFND is the first loss recovery protocol for Solana degens.
+          Scan your wallet for rugged tokens, submit your losses, and enter the hourly lottery pool.
         </motion.p>
 
         <motion.div
