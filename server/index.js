@@ -30,6 +30,10 @@ app.use(cors({
   origin: true,  // Allow all origins for local network access
   credentials: true,
 }));
+
+// Webhook routes MUST be before express.json() to get raw body for signature verification
+app.use('/webhook', webhookRoutes);
+
 app.use(express.json());
 
 // Request logging
@@ -42,7 +46,6 @@ app.use((req, res, next) => {
 // API Routes
 app.use('/api', apiRoutes);
 app.use('/api/transfer', transferRoutes);
-app.use('/webhook', webhookRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {
