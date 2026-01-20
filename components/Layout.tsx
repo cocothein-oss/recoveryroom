@@ -40,7 +40,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onConnect, onDisconnec
             
             {/* Logo */}
             <Link to={AppRoute.LANDING} className="flex-shrink-0 flex items-center space-x-3 cursor-pointer">
-              <img src="/logoweb.png" alt="RFND" className="h-10 w-10 rounded-full" />
+              <img src="/logo.png" alt="RFND" className="h-10 w-10 rounded-full" />
               <div>
                 <h1 className="text-white font-bold text-lg tracking-wider">RF<span className="text-rehab-green">ND</span></h1>
                 <p className="text-[10px] text-slate-500 font-mono tracking-widest uppercase">Loss Recovery Protocol</p>
