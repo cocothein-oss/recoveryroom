@@ -1,3 +1,4 @@
+// Recovery Room v1.0.0 - Deployed on DigitalOcean
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, TrendingUp, Users, Coins } from 'lucide-react';
