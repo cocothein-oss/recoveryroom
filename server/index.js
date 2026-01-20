@@ -1,7 +1,7 @@
 /**
  * Recovery Room Backend Server
  * Simple Express server with JSON file database and WebSocket support
- * Auto-deploy webhook enabled v2
+ * Auto-deploy webhook working
  */
 
 // Load dotenv FIRST before any other imports
