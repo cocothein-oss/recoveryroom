@@ -44,7 +44,7 @@ async function runDeploy() {
     `cd ${deployDir}`,
     'git fetch origin master',
     'git reset --hard origin/master',
-    'npm install --production',
+    'npm install',
     'npm run build',
     'pm2 restart all'
   ].join(' && ');
