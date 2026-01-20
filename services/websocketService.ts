@@ -32,6 +32,11 @@ class WebSocketService {
       return 'wss://recoveryroom-api.loca.lt';
     }
 
+    // Production (rfnd.fun) - use secure WebSocket (nginx proxies to backend)
+    if (hostname === 'rfnd.fun' || hostname === 'www.rfnd.fun') {
+      return `${protocol}//${hostname}`;
+    }
+
     // Local development
     return `ws://${hostname}:6002`;
   }

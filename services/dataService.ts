@@ -3,11 +3,16 @@
  * Communicates with backend API for data persistence
  */
 
-// Dynamic API base - handles local dev and tunnel URLs
+// Dynamic API base - handles local dev and production
 const getApiBase = () => {
   if (typeof window === 'undefined') return 'http://localhost:6002/api';
 
   const hostname = window.location.hostname;
+
+  // Production (rfnd.fun) - use relative URL (nginx proxies to backend)
+  if (hostname === 'rfnd.fun' || hostname === 'www.rfnd.fun') {
+    return '/api';
+  }
 
   // If using Cloudflare tunnel (trycloudflare.com), use the backend tunnel
   if (hostname.endsWith('.trycloudflare.com')) {
