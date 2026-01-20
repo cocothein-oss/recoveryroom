@@ -1,0 +1,27 @@
+[package]
+name = "recovery-room"
+version = "0.1.0"
+description = "Recovery Room - Solana Loss Recovery Lottery with Switchboard VRF"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "recovery_room"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.29.0"
+anchor-spl = "0.29.0"
+switchboard-solana = "0.29.0"
+solana-program = "1.17"
+
+[dev-dependencies]
+solana-program-test = "1.17"
+solana-sdk = "1.17"
+tokio = "1.0"

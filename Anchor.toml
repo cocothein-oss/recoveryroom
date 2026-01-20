@@ -1,0 +1,38 @@
+[features]
+seeds = false
+skip-lint = false
+
+[programs.localnet]
+recovery_room = "RecovRoomVRF111111111111111111111111111111"
+
+[programs.devnet]
+recovery_room = "RecovRoomVRF111111111111111111111111111111"
+
+[programs.mainnet]
+recovery_room = "RecovRoomVRF111111111111111111111111111111"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+[test]
+startup_wait = 5000
+
+[test.validator]
+url = "https://api.devnet.solana.com"
+
+# Switchboard Oracle Queue (Devnet)
+[[test.validator.clone]]
+address = "uPeihMuj5Ehn6WS8L5HJuKDd5DXXWATM3hQi6Ykx4SE"  # Oracle Queue
+
+[[test.validator.clone]]
+address = "2KgowxogBrGqRcgXQEmqFvC3PGtCu66qERNJevYW8Ajh"  # Queue Authority
+
+[[test.validator.clone]]
+address = "sbattyXrzedoNATfc4L31wC9Mhxsi3BmQ4xhomdpZj3"   # Switchboard Program State
